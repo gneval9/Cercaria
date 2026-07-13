@@ -1,5 +1,5 @@
 # Made and developed by gneval9 Software
-# 08-08-2026
+# 08-08-2026 / 11-08-2026
 # Versión: 0.0.0-dev
 
 import time
@@ -12,31 +12,34 @@ from curses import wrapper
 segundos_por_tick = 2 		# Default (2)
 ticks_total = 0
 
-debug = False
+debug =True
 
-dinero = 500
+dinero = 50000
 impuestos = 5
 poblacion = 1
-recursos = 0
+recursos = 1000
 hambre = 0
 alimentos = 150
 fabricas = 1
-casas = 1
+casas = 8
 multi_fabricas = 0.5
 multi_casas = 2
 capacidad = casas * multi_casas
 humor = 100
 
+produccion = 0
 
 
 #---PRECIOS---#
+precios = {
 
-prec_fabrica = [200, 170]
-prec_casa = [170, 100]
+"prec_fabricas": [200, 170],
+"prec_casas": [170, 100],
 
-prec_alimento = [2]
-prec_recurso = [8]
+"prec_alimentos": [2, 0],
+"prec_recursos": [8, 0]
 
+}
 #------------#
 
 
@@ -110,22 +113,23 @@ def main(stdscr):
 
 	
 
-
 	def mostrar_informacion():
 		ventana_info.erase()
 
-		ventana_info.addstr(1,1,f"Dinero: {int(dinero)}€")
+		ventana_info.addstr(1,1,f"Dinero: {int(dinero):,}€")
 		ventana_info.addstr(2,1,f"Impuestos: {impuestos}%")
 	
-		ventana_info.addstr(4,1,f"Población: {int(poblacion)} / {capacidad}")
-		ventana_info.addstr(5,1,f"Casas: {casas}")
-		ventana_info.addstr(6,1,f"Fábricas: {fabricas}")
+		ventana_info.addstr(4,1,f"Población: {int(poblacion):,} / {capacidad:,}")
+		ventana_info.addstr(5,1,f"Casas: {casas:,}")
 
-		ventana_info.addstr(8,1,f"Recursos: {int(recursos)}R")
-		ventana_info.addstr(9,1,f"Alimentos: {int(alimentos)}")
+		ventana_info.addstr(7,1,f"Fábricas: {fabricas:,}")
+		ventana_info.addstr(8,1,f"Producción: {produccion:,}R y {produccion / 4:,}€")
+
+		ventana_info.addstr(10,1,f"Recursos: {int(recursos):,}R")
+		ventana_info.addstr(11,1,f"Alimentos: {int(alimentos):,}")
 	
-		ventana_info.addstr(11,1,f"Hambre: {hambre}%")
-		ventana_info.addstr(12,1,f"Humor: {int(humor)}%")
+		ventana_info.addstr(13,1,f"Hambre: {hambre}%")
+		ventana_info.addstr(14,1,f"Humor: {int(humor)}%")
 	
 
 		if debug == True:
@@ -138,7 +142,165 @@ def main(stdscr):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 	#--- COMANDOS ---#
+
+
+	def comprar_item(argumentos):
+		global dinero, recursos, casas, fabricas, recursos, alimentos
+
+		item = argumentos[0]
+		
+		if item == "fabrica" or item == "casa":
+			item_prec = "prec_" + item + "s"
+			item += "s"
+		
+		else:
+			item_prec = "prec_" + item
+
+
+		cantidad = int(argumentos[1])
+		prec_total_dinero = precios[item_prec][0] * cantidad
+		prec_total_recursos = precios[item_prec][1] * cantidad
+
+		output = f"¿Comprar {cantidad:,} {item} por {prec_total_dinero:,}€ y {prec_total_recursos:,}R? (y o n)"
+		mostrar_comando(output, False)
+
+		while True:
+			tecla = ventana_cmd.getch()
+
+			if tecla == ord("y"):
+				if prec_total_dinero < dinero and prec_total_recursos < recursos:
+					dinero -= prec_total_dinero
+					recursos -= prec_total_recursos
+
+					globals()[item] += cantidad
+
+					ventana_cmd.erase()
+					break
+
+				else:
+					mostrar_comando("No puedes comprar esto")
+					break
+
+			elif tecla == ord("n"):
+				ventana_cmd.erase()
+				break
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	def vender_item(argumentos):
+		global dinero, recursos, casas, fabricas, recursos, alimentos
+
+		item = argumentos[0]
+		
+		if item == "fabrica" or item == "casa":
+			item_prec = "prec_" + item + "s"
+			item += "s"
+		
+		else:
+			item_prec = "prec_" + item
+
+
+		cantidad = int(argumentos[1])
+		prec_total_dinero = (precios[item_prec][0] * cantidad) / 2
+		try:
+			prec_total_recursos = (precios[item_prec][1] * cantidad) / 2
+
+		except:
+			prec_total_recursos = 0
+
+
+		output = f"¿Vender {cantidad:,} {item} por {prec_total_dinero:,}€ y {prec_total_recursos:,}R? (y o n)"
+		mostrar_comando(output, False)
+
+		while True:
+			tecla = ventana_cmd.getch()
+
+			if item == "casas":
+				if tecla == ord("y"):
+					if casas > cantidad and poblacion <= (casas - cantidad) * multi_casas:
+						dinero += prec_total_dinero
+						recursos += prec_total_recursos
+
+						casas -= cantidad
+
+						ventana_cmd.erase()
+						break
+
+					else:
+						if casas <= cantidad:
+							mostrar_comando("No dispones de suficientes objetos para vender")
+
+						elif poblacion > (casas - cantidad) * multi_casas: 
+							mostrar_comando("No puedes dejar a tus ciudadanos sin techo.")
+
+						break
+
+
+
+
+
+			if tecla == ord("y"):
+				if globals()[item] > cantidad:
+					dinero += prec_total_dinero
+					recursos += prec_total_recursos
+
+					globals()[item] -= cantidad
+
+					ventana_cmd.erase()
+					break
+
+				else:
+					mostrar_comando("No dispones de suficientes objetos para vender")
+					break
+
+			elif tecla == ord("n"):
+				ventana_cmd.erase()
+				break
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	def mostrar_comando(output, vanish=True, delay=1.5):
 		ventana_cmd.erase()
@@ -186,7 +348,6 @@ def main(stdscr):
 
 
 
-
 	def ejecutar_comando(comando):
 		global debug, dinero, poblacion, recursos, hambre, alimentos, fabricas, multi_fabricas, humor, capacidad, casas, impuestos, segundos_por_tick
 
@@ -200,13 +361,15 @@ def main(stdscr):
 
 
 		if nombre == "help":
-			output = """help, debug, buy [fabrica/casa/alimentos/recursos] [num], sell [fabrica/casa/alimentos/recursos] [num], 
-						            tax [%], ticks [s/t]"""
+			output = f"""help, debug, buy [fabrica/casa/alimentos/recursos] [num], sell [fabrica/casa/alimentos/recursos] [num], \n {" "* 11}tax [%], ticks [s/t]"""
 			mostrar_comando(output, False)
 
 
 
 		elif nombre == "ticks":
+			if len(argumentos) < 1:
+				return
+
 			segundos_por_tick = float(argumentos[0])
 
 
@@ -222,9 +385,11 @@ def main(stdscr):
 
 
 
-
-
 		elif nombre == "tax":
+
+			if len(argumentos) < 1:
+				return
+
 			if 0 <= int(argumentos[0]) <= 100:
 				impuestos = int(argumentos[0])
 			
@@ -239,252 +404,15 @@ def main(stdscr):
 			if len(argumentos) < 2:
 				return
 
-
-			if argumentos[0] == "fabrica":
-				cantidad = int(argumentos[1])
-				prec_total_dinero = prec_fabrica[0] * cantidad
-				prec_total_recursos = prec_fabrica[1] * cantidad
-
-				output = f"¿Comprar {cantidad} fábricas por {prec_total_dinero}€ y {prec_total_recursos}R? (y o n)"
-				mostrar_comando(output, False)
-
-				while True:
-					tecla = ventana_cmd.getch()
-
-					if tecla == ord("y"):
-						if prec_total_dinero < dinero and prec_total_recursos < recursos:
-							dinero -= prec_total_dinero
-							recursos -= prec_total_recursos
-							fabricas += cantidad
-
-							ventana_cmd.erase()
-							break
-
-						else:
-							mostrar_comando("No puedes comprar esto")
-							break
-
-					elif tecla == ord("n"):
-						ventana_cmd.erase()
-						break
-
-
-
-
-
-			if argumentos[0] == "casa":
-				cantidad = int(argumentos[1])
-				prec_total_dinero = prec_casa[0] * cantidad
-				prec_total_recursos = prec_casa[1] * cantidad
-
-				output = f"¿Comprar {cantidad} casas por {prec_total_dinero}€ y {prec_total_recursos}R? (y o n)"
-				mostrar_comando(output, False)
-
-				while True:
-					tecla = ventana_cmd.getch()
-
-					if tecla == ord("y"):
-						if prec_total_dinero < dinero and prec_total_recursos < recursos:
-							dinero -= prec_total_dinero
-							recursos -= prec_total_recursos
-							casas += cantidad
-
-							ventana_cmd.erase()
-							break
-
-						else:
-							mostrar_comando("No puedes comprar esto")
-							break
-
-					elif tecla == ord("n"):
-						ventana_cmd.erase()
-						break
-
-
-
-
-
-
-			if argumentos[0] == "alimentos":
-				cantidad = int(argumentos[1])
-				prec_total_dinero = prec_alimento[0] * cantidad
-
-				output = f"¿Comprar {cantidad} alimentos por {prec_total_dinero}€? (y o n)"
-				mostrar_comando(output, False)
-
-				while True:
-					tecla = ventana_cmd.getch()
-
-					if tecla == ord("y"):
-						if prec_total_dinero < dinero:
-							dinero -= prec_total_dinero
-							alimentos += cantidad
-
-							ventana_cmd.erase()
-							break
-
-						else:
-							mostrar_comando("No puedes comprar esto")
-							break
-
-					elif tecla == ord("n"):
-						ventana_cmd.erase()
-						break
-
-
-			if argumentos[0] == "recursos":
-				cantidad = int(argumentos[1])
-				prec_total_dinero = prec_recurso[0] * cantidad
-
-
-				output = f"¿Comprar {cantidad} recursos por {prec_total_dinero}€? (y o n)"
-				mostrar_comando(output, False)
-
-				while True:
-					tecla = ventana_cmd.getch()
-
-					if tecla == ord("y"):
-						if prec_total_dinero < dinero:
-							dinero -= prec_total_dinero
-							recursos += cantidad
-
-							ventana_cmd.erase()
-							break
-
-						else:
-							mostrar_comando("No puedes comprar esto")
-							break
-
-					elif tecla == ord("n"):
-						ventana_cmd.erase()
-						break
+			comprar_item(argumentos)
+			
 
 
 		elif nombre =="sell":
 			if len(argumentos) < 2:
 				return
 
-		
-			if argumentos[0] == "fabrica":
-				cantidad = int(argumentos[1])
-				prec_total_dinero = prec_fabrica[0] * cantidad / 2
-				prec_total_recursos = prec_fabrica[1] * cantidad / 2
-
-				output = f"¿Vender {cantidad} fábricas por {prec_total_dinero}€ y {prec_total_recursos}R? (y o n)"
-				mostrar_comando(output, False)
-
-				while True:
-					tecla = ventana_cmd.getch()
-
-					if tecla == ord("y"):
-						if fabricas >= cantidad:
-							dinero += prec_total_dinero
-							recursos += prec_total_recursos
-							fabricas -= cantidad
-
-							ventana_cmd.erase()
-							break
-
-						else:
-							mostrar_comando("No dispones de suficientes fábricas para vender")
-							break
-
-					elif tecla == ord("n"):
-						ventana_cmd.erase()
-						break
-
-
-
-
-
-			if argumentos[0] == "casa":
-				cantidad = int(argumentos[1])
-				prec_total_dinero = prec_casa[0] * cantidad / 2
-				prec_total_recursos = prec_casa[1] * cantidad / 2
-
-				output = f"¿Vender {cantidad} casas por {prec_total_dinero}€ y {prec_total_recursos}R? (y o n)"
-				mostrar_comando(output, False)
-
-				while True:
-					tecla = ventana_cmd.getch()
-
-					if tecla == ord("y"):
-						if casas >= cantidad and (casas - cantidad) * 2 >= poblacion:
-							dinero += prec_total_dinero
-							recursos += prec_total_recursos
-							casas -= cantidad
-
-							ventana_cmd.erase()
-							break
-
-						else:
-							mostrar_comando("No dispones de suficientes casas para vender")
-							break
-
-					elif tecla == ord("n"):
-						ventana_cmd.erase()
-						break
-
-
-
-
-
-
-			if argumentos[0] == "alimentos":
-				cantidad = int(argumentos[1])
-				prec_total_dinero = prec_alimento[0] * cantidad / 2
-				prec_total_recursos = prec_alimento[1] * cantidad / 2
-
-				output = f"¿Vender {cantidad} alimentos por {prec_total_dinero}€ y {prec_total_recursos}R? (y o n)"
-				mostrar_comando(output, False)
-
-				while True:
-					tecla = ventana_cmd.getch()
-
-					if tecla == ord("y"):
-						if alimentos >= cantidad:
-							dinero += prec_total_dinero
-							recursos += prec_total_recursos
-							alimentos -= cantidad
-
-							ventana_cmd.erase()
-							break
-
-						else:
-							mostrar_comando("No dispones de suficientes alimentos para vender")
-							break
-
-					elif tecla == ord("n"):
-						ventana_cmd.erase()
-						break
-
-
-
-			if argumentos[0] == "recursos":
-				cantidad = int(argumentos[1])
-				prec_total_dinero = prec_recurso[0] * cantidad / 2
-
-				output = f"¿Vender {cantidad} recursos por {prec_total_dinero}€? (y o n)"
-				mostrar_comando(output, False)
-
-				while True:
-					tecla = ventana_cmd.getch()
-
-					if tecla == ord("y"):
-						if recursos >= cantidad:
-							dinero += prec_total_dinero
-							recursos -= cantidad
-
-							ventana_cmd.erase()
-							break
-
-						else:
-							mostrar_comando("No dispones de suficientes recursos para vender")
-							break
-
-					elif tecla == ord("n"):
-						ventana_cmd.erase()
-						break
+			vender_item(argumentos)
 
 
 		elif nombre == "exit":
@@ -509,7 +437,7 @@ def main(stdscr):
 	#---LOGICA---#
 
 	def logica():
-		global dinero, poblacion, recursos, hambre, alimentos, fabricas, multi_fabricas, humor, capacidad, casas, impuestos
+		global dinero, poblacion, recursos, hambre, alimentos, fabricas, multi_fabricas, humor, capacidad, casas, impuestos, produccion
 
 
 		# alimentos
@@ -550,7 +478,7 @@ def main(stdscr):
 
 		# casas y capacidad
 
-		capacidad = casas * 2
+		capacidad = casas * multi_casas
 
 
 
@@ -609,6 +537,7 @@ def main(stdscr):
 	#--- MAIN LOOP ---#
 
 	last_tick = time.monotonic()
+	logica()
 
 	while True:
 
@@ -630,7 +559,3 @@ def main(stdscr):
 
 
 wrapper(main)
-
-
-
-
