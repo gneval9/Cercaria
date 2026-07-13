@@ -7,6 +7,7 @@ import sys
 import threading
 import curses
 from curses import wrapper
+import ast
 
 
 segundos_por_tick = 2 		# Default (2)
@@ -14,20 +15,32 @@ ticks_total = 0
 
 debug =True
 
-dinero = 50000
+curs_x = 28
+curs_y = 28 // 2
+
+
+
+fabricas = [[754]]
+casas = 1
+
+num_fabricas = len(fabricas)
+
+
+dinero = 500
 impuestos = 5
 poblacion = 1
-recursos = 1000
+recursos = 0
 hambre = 0
 alimentos = 150
-fabricas = 1
-casas = 8
 multi_fabricas = 0.5
 multi_casas = 2
 capacidad = casas * multi_casas
 humor = 100
 
 produccion = 0
+
+
+
 
 
 #---PRECIOS---#
@@ -64,14 +77,28 @@ def main(stdscr):
 	global segundos_por_tick, ticks_total
 	
 	comando = ""
+	
+
+	with open("mapas_cercaria") as f:
+		mapa = ast.literal_eval(f.read())
 
 	ventana_info = curses.newwin(30, 30, 0, 0)
 	ventana_cmd = curses.newwin(3, curses.COLS, curses.LINES -4, 0)
+	ventana_mapa = curses.newwin(30, 60, 0, 60)
 
 	ventana_cmd.nodelay(True)
 	ventana_cmd.keypad(True)
 	curses.curs_set(0)
 
+
+	curses.start_color()
+
+
+
+	curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
+	curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
+	curses.init_pair(3, curses.COLOR_CYAN, curses.COLOR_BLACK)
+	curses.init_pair(4, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
 
 
 	stdscr.clear()
@@ -114,6 +141,7 @@ def main(stdscr):
 	
 
 	def mostrar_informacion():
+	
 		ventana_info.erase()
 
 		ventana_info.addstr(1,1,f"Dinero: {int(dinero):,}€")
@@ -122,7 +150,7 @@ def main(stdscr):
 		ventana_info.addstr(4,1,f"Población: {int(poblacion):,} / {capacidad:,}")
 		ventana_info.addstr(5,1,f"Casas: {casas:,}")
 
-		ventana_info.addstr(7,1,f"Fábricas: {fabricas:,}")
+		ventana_info.addstr(7,1,f"Fábricas: {num_fabricas:,}")
 		ventana_info.addstr(8,1,f"Producción: {produccion:,}R y {produccion / 4:,}€")
 
 		ventana_info.addstr(10,1,f"Recursos: {int(recursos):,}R")
@@ -131,6 +159,9 @@ def main(stdscr):
 		ventana_info.addstr(13,1,f"Hambre: {hambre}%")
 		ventana_info.addstr(14,1,f"Humor: {int(humor)}%")
 	
+
+
+
 
 		if debug == True:
 			ventana_info.addstr(18,1,f"Segundos por tick: {segundos_por_tick}")
@@ -141,10 +172,53 @@ def main(stdscr):
 
 
 
+	
+	def controlar_mapa(tecla):
+		global curs_x, curs_y
+
+		if tecla == curses.KEY_UP:
+			curs_y -= 1
+
+		elif tecla == curses.KEY_DOWN:
+			curs_y += 1
+
+		elif tecla == curses.KEY_LEFT:
+			curs_x -= 2
+
+		elif tecla == curses.KEY_RIGHT:
+			curs_x += 2
+
+		ventana_mapa.addstr(curs_y, curs_x, "X", curses.color_pair(1))
+
+		ventana_mapa.refresh()
+		
 
 
 
+	def mostrar_mapa(num_mapa):
+		ventana_mapa.erase()
 
+		x = 0
+		y = 1
+
+
+
+		for n in range(len(mapa[num_mapa])):
+			if n !=0 and n % 28 ==0:
+				y += 1
+				x = 0
+
+
+			if mapa[num_mapa][n] == 0:
+				ventana_mapa.addstr(y, x, "-·", curses.color_pair(3))
+
+			elif mapa[num_mapa][n] == 1:
+				ventana_mapa.addstr(y, x, "#·", curses.color_pair(2))			
+
+
+			x += 2
+
+		ventana_mapa.refresh()
 
 
 
@@ -159,7 +233,7 @@ def main(stdscr):
 
 
 	def comprar_item(argumentos):
-		global dinero, recursos, casas, fabricas, recursos, alimentos
+		global dinero, recursos, casas, num_fabricas, recursos, alimentos
 
 		item = argumentos[0]
 		
@@ -214,7 +288,7 @@ def main(stdscr):
 
 
 	def vender_item(argumentos):
-		global dinero, recursos, casas, fabricas, recursos, alimentos
+		global dinero, recursos, casas, num_fabricas, recursos, alimentos
 
 		item = argumentos[0]
 		
@@ -326,6 +400,7 @@ def main(stdscr):
 		nonlocal comando
 
 		tecla = ventana_cmd.getch()
+		controlar_mapa(tecla)
 
 		if tecla != -1:
 			if 32 <= tecla <= 126:
@@ -349,7 +424,7 @@ def main(stdscr):
 
 
 	def ejecutar_comando(comando):
-		global debug, dinero, poblacion, recursos, hambre, alimentos, fabricas, multi_fabricas, humor, capacidad, casas, impuestos, segundos_por_tick
+		global debug, dinero, poblacion, recursos, hambre, alimentos, num_fabricas, multi_fabricas, humor, capacidad, casas, impuestos, segundos_por_tick
 
 		if comando:
 			nombre = comando[0]
@@ -437,7 +512,7 @@ def main(stdscr):
 	#---LOGICA---#
 
 	def logica():
-		global dinero, poblacion, recursos, hambre, alimentos, fabricas, multi_fabricas, humor, capacidad, casas, impuestos, produccion
+		global dinero, poblacion, recursos, hambre, alimentos, num_fabricas, multi_fabricas, humor, capacidad, casas, impuestos, produccion
 
 
 		# alimentos
@@ -467,7 +542,7 @@ def main(stdscr):
 
 		# fabricas
 
-		produccion = (fabricas * multi_fabricas) * poblacion
+		produccion = (num_fabricas * multi_fabricas) * poblacion
 		produccion *= (100 - hambre) / 100
 		produccion *= humor / 100
 
@@ -553,6 +628,7 @@ def main(stdscr):
 
 
 		mostrar_informacion()
+		mostrar_mapa(0)
 		entrada_comandos()
 
 	#-----------------#

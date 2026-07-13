@@ -12,8 +12,9 @@
 - Añadir granjas.
 
 
-* Añadir mapa.
-		tipo_terr, edif
+* Altarnar control de teclado entre entrada de comandos y mapa.
+* Añadir límites al mapa.
+* Programar la colocación de edificios.
 
 
 * Añadir lista de fábricas.
