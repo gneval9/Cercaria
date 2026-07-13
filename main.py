@@ -14,14 +14,14 @@ ticks_total = 0
 
 debug = False
 
-dinero = 200
+dinero = 500
 impuestos = 5
 poblacion = 1
 recursos = 0
 hambre = 0
-alimentos = 50
+alimentos = 150
 fabricas = 1
-casas = 2
+casas = 1
 multi_fabricas = 0.5
 multi_casas = 2
 capacidad = casas * multi_casas
@@ -34,7 +34,7 @@ humor = 100
 prec_fabrica = [200, 170]
 prec_casa = [170, 100]
 
-prec_alimento = [5]
+prec_alimento = [2]
 prec_recurso = [8]
 
 #------------#
@@ -67,7 +67,7 @@ def main(stdscr):
 
 	ventana_cmd.nodelay(True)
 	ventana_cmd.keypad(True)
-	curses.curs_set(1)
+	curses.curs_set(0)
 
 
 
@@ -129,8 +129,8 @@ def main(stdscr):
 	
 
 		if debug == True:
-			ventana_info.addstr(14,1,f"Segundos por tick: {segundos_por_tick}")
-			ventana_info.addstr(15,1,f"Ticks totales: {ticks_total}")	
+			ventana_info.addstr(18,1,f"Segundos por tick: {segundos_por_tick}")
+			ventana_info.addstr(19,1,f"Ticks totales: {ticks_total}")	
 	
 		ventana_info.refresh()
 
@@ -159,6 +159,34 @@ def main(stdscr):
 
 
 
+
+	def entrada_comandos():
+		nonlocal comando
+
+		tecla = ventana_cmd.getch()
+
+		if tecla != -1:
+			if 32 <= tecla <= 126:
+				comando += chr(tecla)
+
+			elif tecla in (8, 127, curses.KEY_BACKSPACE):
+				ventana_cmd.erase()
+				comando = comando[:-1]
+
+			elif tecla in (10, 13):
+				ventana_cmd.erase()
+				ejecutar_comando(comando.split())
+				comando = ""
+
+
+		
+		ventana_cmd.addstr(0,1, "COMANDO >>  " + comando + "_")
+		ventana_cmd.refresh()
+
+
+
+
+
 	def ejecutar_comando(comando):
 		global debug, dinero, poblacion, recursos, hambre, alimentos, fabricas, multi_fabricas, humor, capacidad, casas, impuestos, segundos_por_tick
 
@@ -172,7 +200,8 @@ def main(stdscr):
 
 
 		if nombre == "help":
-			output = "help, debug, buy [fabrica/casa/alimentos] [num], sell [fabrica/casa/alimentos/recursos] [num], tax [%], ticks [s/t]"
+			output = """help, debug, buy [fabrica/casa/alimentos/recursos] [num], sell [fabrica/casa/alimentos/recursos] [num], 
+						            tax [%], ticks [s/t]"""
 			mostrar_comando(output, False)
 
 
@@ -303,7 +332,32 @@ def main(stdscr):
 						break
 
 
+			if argumentos[0] == "recursos":
+				cantidad = int(argumentos[1])
+				prec_total_dinero = prec_recurso[0] * cantidad
 
+
+				output = f"¿Comprar {cantidad} recursos por {prec_total_dinero}€? (y o n)"
+				mostrar_comando(output, False)
+
+				while True:
+					tecla = ventana_cmd.getch()
+
+					if tecla == ord("y"):
+						if prec_total_dinero < dinero:
+							dinero -= prec_total_dinero
+							recursos += cantidad
+
+							ventana_cmd.erase()
+							break
+
+						else:
+							mostrar_comando("No puedes comprar esto")
+							break
+
+					elif tecla == ord("n"):
+						ventana_cmd.erase()
+						break
 
 
 		elif nombre =="sell":
@@ -433,6 +487,11 @@ def main(stdscr):
 						break
 
 
+		elif nombre == "exit":
+			ventana_cmd.clear()
+			ventana_cmd.refresh()
+			sys.exit()
+
 
 
 
@@ -441,32 +500,6 @@ def main(stdscr):
 
 		else:
 			mostrar_comando("Comando inválido")
-
-
-	def entrada_comandos():
-		nonlocal comando
-
-		tecla = ventana_cmd.getch()
-
-		if tecla != -1:
-			if 32 <= tecla <= 126:
-				comando += chr(tecla)
-
-			elif tecla in (8, 127, curses.KEY_BACKSPACE):
-				ventana_cmd.erase()
-				comando = comando[:-1]
-
-			elif tecla in (10, 13):
-				ventana_cmd.erase()
-				ejecutar_comando(comando.split())
-				comando = ""
-
-
-		
-		ventana_cmd.addstr(0,1, "COMANDO >>  " + comando)
-		ventana_cmd.refresh()
-
-
 
 	#----------------#
 
@@ -481,7 +514,7 @@ def main(stdscr):
 
 		# alimentos
 
-		alimentos -= (poblacion / 2)
+		alimentos -= poblacion / 2
 
 		if alimentos <= 0:
 			alimentos = 0
@@ -506,17 +539,18 @@ def main(stdscr):
 
 		# fabricas
 
-		produccion = (fabricas * multi_fabricas) * (poblacion / 2)
+		produccion = (fabricas * multi_fabricas) * poblacion
 		produccion *= (100 - hambre) / 100
 		produccion *= humor / 100
 
 		recursos += produccion
+		dinero += produccion / 4
+
 
 
 		# casas y capacidad
 
 		capacidad = casas * 2
-
 
 
 
@@ -533,7 +567,7 @@ def main(stdscr):
 		# impuestos
 
 		if ticks_total != 0 and ticks_total % 5 == 0:
-			dinero += produccion / 2 * impuestos * poblacion
+			dinero += produccion * impuestos / 100
 
 
 

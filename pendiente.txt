@@ -1,0 +1,13 @@
+--- Cosas pendientes para Cercaria ---
+
+
+- Cambiar fórmula naciemientos
+- Añadir granjas
+- añadir mejoras de fábricas
+- Entrada de comandos independiente del hilo principal
+- Hacer que el mensaje de vender casa cambie en función de si no tienes casas o están ocupadas.
+
+
+* Añadir mapa
+* Añadir lista de fábricas
+* Añadir mantenimiento de fábricas y casas
