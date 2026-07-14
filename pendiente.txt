@@ -11,10 +11,8 @@
 - Cambiar fórmula naciemientos.
 - Añadir granjas.
 
-
-* Altarnar control de teclado entre entrada de comandos y mapa.
-* Añadir límites al mapa.
 * Programar la colocación de edificios.
+* Programar selección de parcela del mapa
 
 
 * Añadir lista de fábricas.
