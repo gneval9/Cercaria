@@ -15,5 +15,4 @@
 * Programar selección de parcela del mapa
 
 
-* Añadir lista de fábricas.
 * Añadir mantenimiento de fábricas y casas.

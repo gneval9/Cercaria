@@ -1,6 +1,6 @@
 # Made and developed by gneval9 Software
 # 08-08-2026 / 14-08-2026
-# Versión: 0.0.0-dev
+# Versión: 1.0.0
 
 import time
 import sys
@@ -13,30 +13,32 @@ import ast
 segundos_por_tick = 2 		# Default (2)
 ticks_total = 0
 
-debug = True
+debug = False
 mode = "comm"		# comm, map
 
 curs_x = 28
 curs_y = 28 // 2
 
+num_mapa = 0
 map_pos = 0
 
 
-fabricas = [[668], [455]]
-casas = 1
+fabricas = [[668]]
+casas = [[553]]
 
 num_fabricas = len(fabricas)
+num_casas = len(casas)
 
 
-dinero = 50000
+dinero = 500
 impuestos = 5
 poblacion = 1
-recursos = 10000
+recursos = 0
 hambre = 0
 alimentos = 150
 multi_fabricas = 0.5
 multi_casas = 2
-capacidad = casas * multi_casas
+capacidad = num_casas * multi_casas
 humor = 100
 
 produccion = 0
@@ -48,8 +50,8 @@ produccion = 0
 #---PRECIOS---#
 precios = {
 
-"prec_fabricas": [200, 170],
-"prec_casas": [170, 100],
+"prec_fabrica": [200, 170],
+"prec_casa": [170, 100],
 
 "prec_alimentos": [2, 0],
 "prec_recursos": [8, 0]
@@ -85,7 +87,8 @@ def main(stdscr):
 		mapa = ast.literal_eval(f.read())
 
 	ventana_info = curses.newwin(30, 30, 0, 0)
-	ventana_cmd = curses.newwin(3, curses.COLS, curses.LINES -4, 0)
+	ventana_cmd = curses.newwin(1, curses.COLS, curses.LINES -4, 0)
+	ventana_cmdout = curses.newwin(2, curses.COLS, curses.LINES -3, len("COMANDO >>  "))
 	ventana_mapa = curses.newwin(28, 57, 0, 60)
 
 	ventana_cmd.nodelay(True)
@@ -102,6 +105,7 @@ def main(stdscr):
 	curses.init_pair(3, curses.COLOR_CYAN, curses.COLOR_BLACK)
 	curses.init_pair(4, curses.COLOR_WHITE, curses.COLOR_BLACK)
 	curses.init_pair(5, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+	curses.init_pair(6, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
 
 
 	stdscr.clear()
@@ -141,7 +145,6 @@ def main(stdscr):
 	stdscr.clear()
 	stdscr.refresh()
 
-	
 
 	def mostrar_informacion():
 	
@@ -151,7 +154,7 @@ def main(stdscr):
 		ventana_info.addstr(2,1,f"Impuestos: {impuestos}%")
 	
 		ventana_info.addstr(4,1,f"Población: {int(poblacion):,} / {capacidad:,}")
-		ventana_info.addstr(5,1,f"Casas: {casas:,}")
+		ventana_info.addstr(5,1,f"Casas: {num_casas:,}")
 
 		ventana_info.addstr(7,1,f"Fábricas: {num_fabricas:,}")
 		ventana_info.addstr(8,1,f"Producción: {round(produccion,3):,}R y {round(produccion / 3, 3):,}€")
@@ -171,7 +174,6 @@ def main(stdscr):
 			ventana_info.addstr(19,1,f"Ticks totales: {ticks_total}")	
 			ventana_info.addstr(20,1,f"Mode: {mode}")
 			ventana_info.addstr(21,1,f"Map_pos: {map_pos}")
-			ventana_info.addstr(22,1,f"Lista fábricas: {fabricas}")
 	
 		ventana_info.refresh()
 
@@ -184,37 +186,31 @@ def main(stdscr):
 	def controlar_mapa(tecla):
 		global curs_x, curs_y, mode, map_pos
 
-		while True:
-			map_pos = ((curs_y * 28) + (curs_x // 2)) - 28
+		map_pos = ((curs_y * 28) + (curs_x // 2)) - 28
 
 
-			if tecla == curses.KEY_UP and curs_y > 1:
-				curs_y -= 1
+		if tecla == curses.KEY_UP and curs_y > 1:
+			curs_y -= 1
+			curses.flushinp()
 
-			elif tecla == curses.KEY_DOWN and curs_y < 27:
-				curs_y += 1
+		elif tecla == curses.KEY_DOWN and curs_y < 27:
+			curs_y += 1
+			curses.flushinp()
 
-			elif tecla == curses.KEY_LEFT and curs_x > 1:
-				curs_x -= 2
+		elif tecla == curses.KEY_LEFT and curs_x > 1:
+			curs_x -= 2
+			curses.flushinp()
 
-			elif tecla == curses.KEY_RIGHT and curs_x < 53:
-				curs_x += 2
-
-
-			elif tecla in (10, 13):
-
-				curs_x = 28
-				curs_y = 28 // 2
-
-				mode = "comm"
-				break
+		elif tecla == curses.KEY_RIGHT and curs_x < 53:
+			curs_x += 2
+			curses.flushinp()
 
 
-			if mode == "map":
-				ventana_mapa.addstr(curs_y, curs_x, "X", curses.color_pair(1))
+		if mode == "map":
+			ventana_mapa.addstr(curs_y, curs_x, "X", curses.color_pair(1))
 
 
-			ventana_mapa.refresh()
+		ventana_mapa.refresh()
 		
 
 
@@ -227,7 +223,6 @@ def main(stdscr):
 		x = 0
 		y = 1
 
-		#((curs_y * 28) + (curs_x // 2)) - 28
 
 		for n in range(len(mapa[num_mapa])):
 			if n !=0 and n % 28 ==0:
@@ -248,11 +243,16 @@ def main(stdscr):
 
 
 		for i in range(len(fabricas)):
-			y = fabricas[i][0] // 28
+			y = fabricas[i][0] // 28 + 1
 			x = (fabricas[i][0] % 28) * 2 
 			
 			ventana_mapa.addstr(y, x, "M·", curses.color_pair(5))
 
+		for i in range(len(casas)):
+			y = casas[i][0] // 28 + 1
+			x = (casas[i][0] % 28) * 2 
+			
+			ventana_mapa.addstr(y, x, "A·", curses.color_pair(6))
 
 		ventana_mapa.refresh()
 			
@@ -267,54 +267,48 @@ def main(stdscr):
 
 
 	def comprar_item(argumentos):
-		global dinero, recursos, casas, num_fabricas, recursos, alimentos
+		global dinero, recursos, alimentos
+
+		if argumentos[0] in ("fabrica", "casa"):
+			return
 
 		item = argumentos[0]
-		
-		if item == "fabrica" or item == "casa":
-			item += "s"
-			item_prec = "prec_" + item
-		
-		else:
-			item_prec = "prec_" + item
+	
+		item_prec = "prec_" + item
 
 
 		cantidad = int(argumentos[1])
 		prec_total_dinero = precios[item_prec][0] * cantidad
 		prec_total_recursos = precios[item_prec][1] * cantidad
 
+
 		output = f"¿Comprar {cantidad:,} {item} por {prec_total_dinero:,}€ y {prec_total_recursos:,}R? (y o n)"
 		mostrar_comando(output, False)
 
-		if item not in ("fabricas", "casas"):
-			while True:
-				tecla = ventana_cmd.getch()
+		while True:
+			tecla = ventana_cmd.getch()
 
-				if tecla == ord("y"):
-					if prec_total_dinero < dinero and prec_total_recursos < recursos:
-						dinero -= prec_total_dinero
-						recursos -= prec_total_recursos
+			if tecla == ord("y"):
+				if prec_total_dinero < dinero and prec_total_recursos < recursos:
+					dinero -= prec_total_dinero
+					recursos -= prec_total_recursos
 
-						globals()[item] += cantidad
+					globals()[item] += cantidad
 
-						ventana_cmd.erase()
-						break
-
-					else:
-						mostrar_comando("No puedes comprar esto")
-						break
-
-				elif tecla == ord("n"):
 					ventana_cmd.erase()
+					ventana_cmdout.erase()
 					break
 
+				else:
+					mostrar_comando("No puedes comprar esto")
+					break
 
-		else:
-			mode = "map"
-			fabricas.append[[map_pos]]
+			elif tecla == ord("n"):
+				ventana_cmd.erase()
+				ventana_cmdout.erase()
+				break
 
-
-
+		time.sleep(0.01)
 
 
 
@@ -329,16 +323,11 @@ def main(stdscr):
 
 
 	def vender_item(argumentos):
-		global dinero, recursos, casas, num_fabricas, recursos, alimentos
+		global dinero, recursos, alimentos
 
 		item = argumentos[0]
 		
-		if item == "fabrica" or item == "casa":
-			item_prec = "prec_" + item + "s"
-			item += "s"
-		
-		else:
-			item_prec = "prec_" + item
+		item_prec = "prec_" + item
 
 
 		cantidad = int(argumentos[1])
@@ -358,20 +347,21 @@ def main(stdscr):
 
 			if item == "casas":
 				if tecla == ord("y"):
-					if casas > cantidad and poblacion <= (casas - cantidad) * multi_casas:
+					if num_casas > cantidad and poblacion <= (num_casas - cantidad) * multi_casas:
 						dinero += prec_total_dinero
 						recursos += prec_total_recursos
 
-						casas -= cantidad
+						num_casas -= cantidad
 
 						ventana_cmd.erase()
+						ventana_cmdout.erase()
 						break
 
 					else:
-						if casas <= cantidad:
+						if num_casas <= cantidad:
 							mostrar_comando("No dispones de suficientes objetos para vender")
 
-						elif poblacion > (casas - cantidad) * multi_casas: 
+						elif poblacion > (num_casas - cantidad) * multi_casas: 
 							mostrar_comando("No puedes dejar a tus ciudadanos sin techo.")
 
 						break
@@ -388,6 +378,7 @@ def main(stdscr):
 					globals()[item] -= cantidad
 
 					ventana_cmd.erase()
+					ventana_cmdout.erase()
 					break
 
 				else:
@@ -396,31 +387,189 @@ def main(stdscr):
 
 			elif tecla == ord("n"):
 				ventana_cmd.erase()
+				ventana_cmdout.erase()
 				break
 
 
 
 
 
+	def construir(argumentos):
+		global mode, curs_x, curs_y, fabricas, dinero, recursos, num_fabricas, num_casas, capacidad
+
+		item = argumentos[0]
+		item_prec = "prec_" + item
+
+		prec_total_dinero = precios[item_prec][0]
+		try:
+			prec_total_recursos = precios[item_prec][1]
+
+		except:
+			prec_total_recursos = 0
 
 
 
+		mode = "map"
+		while True:
+			mostrar_comando(f"Construir {item} por {prec_total_dinero:,}€ y {prec_total_recursos:,}R", False)
+			mostrar_comando("Pulsa [ESC] para dejar de construir", False, 0, (1,0))
+			tecla = ventana_cmd.getch()
 
-	def mostrar_comando(output, vanish=True, delay=1.5):
-		ventana_cmd.erase()
+			if tecla in (10, 13):  # ENTER
+				if prec_total_dinero < dinero and prec_total_recursos < recursos:
+						
+					if mapa[num_mapa][map_pos] == 0 or mapa[num_mapa][map_pos] == 2:
+						ventana_cmdout.erase()
+						mostrar_comando("No puedes construir aquí")
 
-		ventana_cmd.addstr(0,1, "COMANDO >>  " )
-		ventana_cmd.addstr(1,len("COMANDO >>  "), output)
+					elif any(casa[0] == map_pos for casa in casas) or any(fabrica[0] == map_pos for fabrica in fabricas):
+						ventana_cmdout.erase()
+						mostrar_comando("No puedes construir aquí")
+
+					else:
+						dinero -= prec_total_dinero
+						recursos -= prec_total_recursos
+
+						capacidad = num_casas * multi_casas
+
+						globals()[item + "s"].append([map_pos])
+						globals()["num_" + item + "s"] = len(globals()[item + "s"])
+
+
+
+				else:
+					curses.flushinp()
+					ventana_cmdout.erase()
+					mostrar_comando("No puedes comprar esto")
+					time.sleep(1)
+					curses.flushinp()
+			
 		
-		ventana_cmd.refresh()
+
+
+			elif tecla == 27:  # ESC
+				curs_x = 28
+				curs_y = 28 // 2		
+				
+				mode = "comm"
+				ventana_cmdout.erase()
+				ventana_cmdout.refresh()
+				break
+
+
+			else:
+				mostrar_mapa(num_mapa)
+				controlar_mapa(tecla)
+				mostrar_informacion()
+				time.sleep(0.05)
+				
+
+
+	def destruir(argumentos):
+		global mode, curs_x, curs_y, fabricas, dinero, recursos, num_fabricas, num_casas, capacidad
+
+		item = argumentos[0]
+		item_prec = "prec_" + item
+
+		prec_total_dinero = precios[item_prec][0] // 2
+		try:
+			prec_total_recursos = precios[item_prec][1] // 2
+
+		except:
+			prec_total_recursos = 0
+
+		mode = "map"
+		while True:
+			mostrar_comando(f"Destruir {item} por {prec_total_dinero:,}€ y {prec_total_recursos:,}R", False)
+			mostrar_comando("Pulsa [ESC] para dejar de destruir", False, 0, (1,0))
+			tecla = ventana_cmd.getch()
+
+			if tecla in (10, 13):  # ENTER
+				if item == "casa":
+					casa = next((c for c in casas if c[0] == map_pos), None)
+
+					if casa == None:
+						pass
+
+					elif poblacion > (num_casas -1)  *  multi_casas: 
+								ventana_cmdout.erase()
+								mostrar_comando("No puedes dejar a tus ciudadanos sin techo.")
+
+					else:
+						casas.remove(casa)
+
+
+					num_casas = len(casas)
+					capacidad = num_casas * multi_casas
+
+				else:
+					curses.flushinp()
+					ventana_cmdout.erase()
+					time.sleep(1)
+					curses.flushinp()
+
+
+
+				if item == "fabrica":
+					fabrica = next((f for f in fabricas if f[0] == map_pos), None)
+
+					if fabrica == None:
+						pass
+
+					elif num_fabricas <= 1:
+						ventana_cmdout.erase()
+						mostrar_comando("No puedes quedarte sin fábricas")
+
+					else:
+						fabricas.remove(fabrica)
+
+
+					num_fabricas = len(fabricas)
+
+
+
+				else:
+					curses.flushinp()
+					ventana_cmdout.erase()
+					time.sleep(1)
+					curses.flushinp()
+			
+		
+
+
+			elif tecla == 27:  # ESC
+				curs_x = 28
+				curs_y = 28 // 2		
+				
+				mode = "comm"
+				ventana_cmdout.erase()
+				ventana_cmdout.refresh()
+				break
+
+
+			else:
+				mostrar_mapa(num_mapa)
+				controlar_mapa(tecla)
+				mostrar_informacion()
+				time.sleep(0.05)
+
+
+
+
+	def mostrar_comando(output, vanish=True, delay=1.5, pos=(0,0)):
+		ventana_cmd.erase()
+		ventana_cmd.addstr(0,1, "COMANDO >>  ")
+		ventana_cmdout.addstr(pos[0],pos[1], output)
+		
+		ventana_cmdout.refresh()
 		
 		if vanish == True:
 			time.sleep(delay)
-			ventana_cmd.erase()
-			ventana_cmd.refresh()
+			ventana_cmdout.erase()
+			ventana_cmdout.refresh()
 
 		else:
-			ventana_cmd.refresh()
+			ventana_cmdout.refresh()
 			
 
 
@@ -445,6 +594,7 @@ def main(stdscr):
 
 				elif tecla in (10, 13):
 					ventana_cmd.erase()
+					ventana_cmdout.erase()
 					ejecutar_comando(comando.split())
 					comando = ""
 
@@ -463,7 +613,7 @@ def main(stdscr):
 
 
 	def ejecutar_comando(comando):
-		global debug, dinero, poblacion, recursos, hambre, alimentos, num_fabricas, multi_fabricas, humor, capacidad, casas, impuestos, segundos_por_tick, mode
+		global debug, dinero, poblacion, recursos, hambre, alimentos, num_fabricas, multi_fabricas, humor, capacidad, num_casas, impuestos, segundos_por_tick, mode
 
 		if comando:
 			nombre = comando[0]
@@ -475,7 +625,7 @@ def main(stdscr):
 
 
 		if nombre == "help":
-			output = f"""help, debug, buy [fabrica/casa/alimentos/recursos] [num], sell [fabrica/casa/alimentos/recursos] [num], \n {" "* 11}tax [%], ticks [s/t]"""
+			output = f"""help, build [fabrica, casa], destroy [fabrica, casa], buy [alimentos/recursos] [num], tax [%], ticks [s/t], debug,  \nsell [alimentos/recursos] [num]"""
 			mostrar_comando(output, False)
 
 
@@ -499,6 +649,7 @@ def main(stdscr):
 
 
 
+
 		elif nombre == "tax":
 
 			if len(argumentos) < 1:
@@ -512,8 +663,12 @@ def main(stdscr):
 
 
 
+
+
 		elif nombre == "map":
 			mode = "map"
+
+
 
 
 		elif nombre == "buy":
@@ -524,16 +679,35 @@ def main(stdscr):
 			
 
 
-		elif nombre =="sell":
+
+		elif nombre == "sell":
 			if len(argumentos) < 2:
 				return
 
 			vender_item(argumentos)
 
 
+
+
+		elif nombre == "build":
+			if len(argumentos) < 1:
+				return
+
+			construir(argumentos)
+
+		elif nombre == "destroy":
+			if len(argumentos) < 1:
+				return
+
+			destruir(argumentos)
+
 		elif nombre == "exit":
 			ventana_cmd.clear()
+			ventana_cmdout.erase()
+
 			ventana_cmd.refresh()
+			ventana_cmdout.refresh()
+
 			sys.exit()
 
 
@@ -589,13 +763,15 @@ def main(stdscr):
 		produccion *= humor / 100
 
 		recursos += produccion
-		dinero += produccion / 4
+		dinero += produccion / 3
+
+		num_fabricas = len(fabricas)
 
 
 
 		# casas y capacidad
 
-		capacidad = casas * multi_casas
+		capacidad = num_casas * multi_casas
 
 
 
@@ -642,10 +818,13 @@ def main(stdscr):
 
 				if tecla in (10, 13, curses.KEY_ENTER):
 					ventana_cmd.clear()
+					ventana_cmdout.erase()
+
 					ventana_cmd.refresh()
+					ventana_cmdout.refresh()
 					sys.exit()
 
-
+				time.sleep(0.01)
 
 
 
@@ -655,6 +834,7 @@ def main(stdscr):
 
 	last_tick = time.monotonic()
 	logica()
+	mostrar_comando("Escribe 'help' para ver todos los comandos", False)
 
 	while True:
 
@@ -670,7 +850,7 @@ def main(stdscr):
 
 
 		mostrar_informacion()
-		mostrar_mapa(0)
+		mostrar_mapa(num_mapa)
 		entrada_comandos()
 
 	#-----------------#
