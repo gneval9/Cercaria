@@ -1,18 +1,18 @@
 --- Cosas pendientes para Cercaria ---
 
-
+ 
 ! Comprobar el tipo de argumento y, en caso de no ser correcto, notificarlo.
 
 
 + Entrada de comandos independiente del hilo principal.
 
+- Cambiar color de "hambre" cuando empiece a crecer y de "alimentos" cuando escaseen.
 
 - Añadir mejoras de fábricas.
 - Cambiar fórmula naciemientos.
 - Añadir granjas.
 
-* Programar la colocación de edificios.
-* Programar selección de parcela del mapa
 
+* Programar selección de parcela del mapa
 
 * Añadir mantenimiento de fábricas y casas.

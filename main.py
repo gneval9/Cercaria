@@ -1,6 +1,6 @@
 # Made and developed by gneval9 Software
 # 08-08-2026 / 14-08-2026
-version =  "1.0.1"
+version =  "1.1.2"
 
 import time
 import sys
@@ -30,10 +30,10 @@ num_fabricas = len(fabricas)
 num_casas = len(casas)
 
 
-dinero = 500
+dinero = 5000
 impuestos = 5
 poblacion = 1
-recursos = 0
+recursos = 10000
 hambre = 0
 alimentos = 150
 multi_fabricas = 0.5
@@ -50,8 +50,8 @@ produccion = 0
 #---PRECIOS---#
 precios = {
 
-"prec_fabrica": [200, 170],
-"prec_casa": [170, 100],
+"prec_fabrica": [300 * num_fabricas // 2, 170 * num_fabricas // 2],
+"prec_casa": [170 * num_casas // 2, 100 * num_casas // 2],
 
 "prec_alimentos": [2, 0],
 "prec_recursos": [8, 0]
@@ -254,6 +254,9 @@ def main(stdscr):
 			
 			ventana_mapa.addstr(y, x, "A·", curses.color_pair(6))
 
+		for n in range(1, 28):
+			ventana_mapa.addstr(n, 55, " ")
+
 		ventana_mapa.refresh()
 			
 
@@ -297,6 +300,7 @@ def main(stdscr):
 
 					ventana_cmd.erase()
 					ventana_cmdout.erase()
+					ventana_cmdout.refresh()
 					break
 
 				else:
@@ -306,6 +310,7 @@ def main(stdscr):
 			elif tecla == ord("n"):
 				ventana_cmd.erase()
 				ventana_cmdout.erase()
+				ventana_cmdout.refresh()
 				break
 
 		time.sleep(0.01)
@@ -345,31 +350,6 @@ def main(stdscr):
 		while True:
 			tecla = ventana_cmd.getch()
 
-			if item == "casas":
-				if tecla == ord("y"):
-					if num_casas > cantidad and poblacion <= (num_casas - cantidad) * multi_casas:
-						dinero += prec_total_dinero
-						recursos += prec_total_recursos
-
-						num_casas -= cantidad
-
-						ventana_cmd.erase()
-						ventana_cmdout.erase()
-						break
-
-					else:
-						if num_casas <= cantidad:
-							mostrar_comando("No dispones de suficientes objetos para vender")
-
-						elif poblacion > (num_casas - cantidad) * multi_casas: 
-							mostrar_comando("No puedes dejar a tus ciudadanos sin techo.")
-
-						break
-
-
-
-
-
 			if tecla == ord("y"):
 				if globals()[item] > cantidad:
 					dinero += prec_total_dinero
@@ -379,6 +359,7 @@ def main(stdscr):
 
 					ventana_cmd.erase()
 					ventana_cmdout.erase()
+					ventana_cmdout.refresh()
 					break
 
 				else:
@@ -388,6 +369,7 @@ def main(stdscr):
 			elif tecla == ord("n"):
 				ventana_cmd.erase()
 				ventana_cmdout.erase()
+				ventana_cmdout.refresh()
 				break
 
 
