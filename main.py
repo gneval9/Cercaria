@@ -1,6 +1,6 @@
 # Made and developed by gneval9 Software
 # 08-08-2026 / 14-08-2026
-# Versión: 1.0.0
+# Versión: 1.0.1
 
 import time
 import sys
@@ -625,7 +625,7 @@ def main(stdscr):
 
 
 		if nombre == "help":
-			output = f"""help, build [fabrica, casa], destroy [fabrica, casa], buy [alimentos/recursos] [num], tax [%], ticks [s/t], debug,  \nsell [alimentos/recursos] [num]"""
+			output = f"""help, build [fabrica, casa], destroy [fabrica, casa], buy [alimentos/recursos] [num], tax [%], ticks [s/t], debug,  \nsell [alimentos/recursos] [num], exit"""
 			mostrar_comando(output, False)
 
 
