@@ -1,6 +1,6 @@
 # Made and developed by gneval9 Software
 # 08-08-2026 / 14-08-2026
-version =  "1.1.2"
+version =  "1.1.3"
 
 import time
 import sys
@@ -30,10 +30,10 @@ num_fabricas = len(fabricas)
 num_casas = len(casas)
 
 
-dinero = 5000
+dinero = 300
 impuestos = 5
 poblacion = 1
-recursos = 10000
+recursos = 0
 hambre = 0
 alimentos = 150
 multi_fabricas = 0.5
