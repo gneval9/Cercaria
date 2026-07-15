@@ -12,7 +12,7 @@
 - Cambiar fórmula naciemientos.
 - Añadir granjas.
 
-
+* Programar función de guardado y cargado de partidas
 * Programar selección de parcela del mapa
 
 * Añadir mantenimiento de fábricas y casas.

@@ -1,15 +1,23 @@
 # Made and developed by gneval9 Software
-# 08-08-2026
+# 08-07-2026
 
-version =  "1.1.5"
-fecha = "15-08-2026"
+version =  "1.1.6"
+fecha = "15-07-2026"
 
 import time
-import sys
 import threading
 import curses
 from curses import wrapper
 import ast
+
+from pathlib import Path
+import sys
+
+def resource_path(nombre):
+	if getattr(sys, "frozen", False):
+		return Path(sys._MEIPASS) / nombre
+	return Path(__file__).resolve().parent / nombre
+
 
 
 segundos_por_tick = 2 		# Default (2)
@@ -85,7 +93,7 @@ def main(stdscr):
 	comando = ""
 	
 
-	with open("mapas_cercaria") as f:
+	with open(resource_path("mapas_cercaria"), "r") as f:
 		mapa = ast.literal_eval(f.read())
 
 	ventana_info = curses.newwin(30, 30, 0, 0)
