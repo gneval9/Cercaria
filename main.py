@@ -1,6 +1,6 @@
 # Made and developed by gneval9 Software
 # 08-08-2026 / 14-08-2026
-version =  "1.1.3"
+version =  "1.1.4"
 
 import time
 import sys
@@ -329,6 +329,10 @@ def main(stdscr):
 
 	def vender_item(argumentos):
 		global dinero, recursos, alimentos
+
+		if argumentos[0] in ("fabrica", "casa"):
+			return
+
 
 		item = argumentos[0]
 		
@@ -785,6 +789,19 @@ def main(stdscr):
 
 		humor = clamp(humor, 0, 100)
 
+
+
+		# recálculo de precios
+
+		precios = {
+
+		"prec_fabrica": [300 * num_fabricas // 2, 170 * num_fabricas // 2],
+		"prec_casa": [170 * num_casas // 2, 100 * num_casas // 2],
+
+		"prec_alimentos": [2, 0],
+		"prec_recursos": [8, 0]
+
+		}
 
 
 
