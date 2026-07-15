@@ -1,6 +1,8 @@
 # Made and developed by gneval9 Software
-# 08-08-2026 / 14-08-2026
-version =  "1.1.4"
+# 08-08-2026
+
+version =  "1.1.5"
+fecha = "15-08-2026"
 
 import time
 import sys
@@ -133,7 +135,7 @@ def main(stdscr):
                                     |-.. .  .-..-..-,. ..-. |`-;  `-..-.-|--|-. . ..-. .-..-,
                                     `-''-|  `-|' '`'- ` `-`-'-'   `-'`-' '  '- ` ` `-`-'  `'-
                                        `-'  `-'                                              
-                                                      | V{version} | 14-08-2026 |
+                                                      | V{version} | {fecha} |
 
 
 
@@ -381,22 +383,35 @@ def main(stdscr):
 
 
 	def construir(argumentos):
-		global mode, curs_x, curs_y, fabricas, dinero, recursos, num_fabricas, num_casas, capacidad
+		global mode, curs_x, curs_y, fabricas, dinero, recursos, num_fabricas, num_casas, capacidad, precios
 
 		item = argumentos[0]
 		item_prec = "prec_" + item
 
-		prec_total_dinero = precios[item_prec][0]
-		try:
-			prec_total_recursos = precios[item_prec][1]
-
-		except:
-			prec_total_recursos = 0
 
 
 
 		mode = "map"
 		while True:
+			precios = {
+
+			"prec_fabrica": [300 * num_fabricas // 2, 170 * num_fabricas // 2],
+			"prec_casa": [170 * num_casas // 2, 100 * num_casas // 2],
+
+			"prec_alimentos": [2, 0],
+			"prec_recursos": [8, 0]
+
+			}
+
+			prec_total_dinero = precios[item_prec][0]
+			try:
+				prec_total_recursos = precios[item_prec][1]
+
+			except:
+				prec_total_recursos = 0
+
+
+
 			mostrar_comando(f"Construir {item} por {prec_total_dinero:,}€ y {prec_total_recursos:,}R", False)
 			mostrar_comando("Pulsa [ESC] para dejar de construir", False, 0, (1,0))
 			tecla = ventana_cmd.getch()
@@ -452,20 +467,31 @@ def main(stdscr):
 
 
 	def destruir(argumentos):
-		global mode, curs_x, curs_y, fabricas, dinero, recursos, num_fabricas, num_casas, capacidad
+		global mode, curs_x, curs_y, fabricas, dinero, recursos, num_fabricas, num_casas, capacidad, precios
 
 		item = argumentos[0]
 		item_prec = "prec_" + item
 
-		prec_total_dinero = precios[item_prec][0] // 2
-		try:
-			prec_total_recursos = precios[item_prec][1] // 2
-
-		except:
-			prec_total_recursos = 0
-
 		mode = "map"
 		while True:
+			precios = {
+
+			"prec_fabrica": [300 * num_fabricas // 2, 170 * num_fabricas // 2],
+			"prec_casa": [170 * num_casas // 2, 100 * num_casas // 2],
+
+			"prec_alimentos": [2, 0],
+			"prec_recursos": [8, 0]
+
+			}
+
+			prec_total_dinero = precios[item_prec][0]
+			try:
+				prec_total_recursos = precios[item_prec][1]
+
+			except:
+				prec_total_recursos = 0
+
+
 			mostrar_comando(f"Destruir {item} por {prec_total_dinero:,}€ y {prec_total_recursos:,}R", False)
 			mostrar_comando("Pulsa [ESC] para dejar de destruir", False, 0, (1,0))
 			tecla = ventana_cmd.getch()
@@ -620,8 +646,8 @@ def main(stdscr):
 			if len(argumentos) < 1:
 				return
 
-			segundos_por_tick = float(argumentos[0])
-
+			#segundos_por_tick = float(argumentos[0])
+			mostrar_comando("¡Tramposo!")
 
 		elif nombre == "debug":
 			if debug == False:
@@ -789,19 +815,6 @@ def main(stdscr):
 
 		humor = clamp(humor, 0, 100)
 
-
-
-		# recálculo de precios
-
-		precios = {
-
-		"prec_fabrica": [300 * num_fabricas // 2, 170 * num_fabricas // 2],
-		"prec_casa": [170 * num_casas // 2, 100 * num_casas // 2],
-
-		"prec_alimentos": [2, 0],
-		"prec_recursos": [8, 0]
-
-		}
 
 
 
