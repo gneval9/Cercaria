@@ -15,8 +15,8 @@ import sys
 
 def resource_path(nombre):
 	if getattr(sys, "frozen", False):
-		return Path(sys._MEIPASS) / nombre
-	return Path(__file__).resolve().parent / nombre
+		base = Path(sys.executable).parent / "_internal"
+		return base / nombre
 
 
 
