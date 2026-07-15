@@ -25,10 +25,13 @@ jobs:
           pip install windows-curses
 
       - name: Build executable
-        run: pyinstaller --onefile --clean --name Cercaria --add-data "mapas_cercaria;." main.py
+        shell: cmd
+        run: |
+          pyinstaller --clean --name Cercaria --add-data "mapas_cercaria;." main.py
 
+          
       - name: Upload executable
         uses: actions/upload-artifact@v4
         with:
           name: Cercaria-Windows
-          path: dist/Cercaria.exe
+          path: dist/Cercaria
