@@ -677,12 +677,6 @@ def main(stdscr):
 
 
 
-		elif nombre == "map":
-			mode = "map"
-
-
-
-
 		elif nombre == "buy":
 			if len(argumentos) < 2:
 				return
