@@ -97,7 +97,7 @@ def main(stdscr):
 
 	ventana_info = curses.newwin(30, 30, 0, 0)
 	ventana_cmd = curses.newwin(1, curses.COLS, curses.LINES -4, 0)
-	ventana_cmdout = curses.newwin(2, curses.COLS, curses.LINES -3, len("COMANDO >>  "))
+	ventana_cmdout = curses.newwin(2, curses.COLS -10, curses.LINES -3, len("COMANDO >>  "))
 	ventana_mapa = curses.newwin(28, 57, 0, 60)
 
 	ventana_cmd.nodelay(True)
