@@ -9,13 +9,12 @@ import threading
 import curses
 from curses import wrapper
 import ast
-
 from pathlib import Path
 import sys
 
 def resource_path(nombre):
 	if getattr(sys, "frozen", False):
-		base = Path(sys.executable).parent / "_internal"
+		base = Path(sys.executable).parent
 		return base / nombre
 
 
