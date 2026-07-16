@@ -92,7 +92,7 @@ def main(stdscr):
 	comando = ""
 	
 
-	with open(resource_path("mapas_cercaria"), "r") as f:
+	with open("mapas_cercaria", "r") as f:
 		mapa = ast.literal_eval(f.read())
 
 	ventana_info = curses.newwin(30, 30, 0, 0)
